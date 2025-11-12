@@ -11,7 +11,12 @@ const db = admin.db;
 const app = express();
 const server = http.createServer(app);
 
-app.use(cors());
+app.use(cors({
+  origin: ["https://location-maison-476fb.web.app", "https://location-maison-476fb.firebaseapp.com"], // ton domaine frontend
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
+
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
