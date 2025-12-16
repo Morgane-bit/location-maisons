@@ -16,6 +16,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+<<<<<<< HEAD
 // --- GET toutes les maisons avec filtres ---
 router.get("/", async (req, res) => {
   try {
@@ -44,10 +45,24 @@ router.get("/", async (req, res) => {
     res.json(maisons);
   } catch (err) {
     console.error("Erreur GET /maisons :", err);
+=======
+  // GET toutes les maisons (public)
+router.get("/", async (req, res) => {
+  try {
+    const db = req.app.locals.db;
+    const snapshot = await db.collection("maisons").get();
+    const maisons = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), images: doc.data().images || [] }));
+    res.json(maisons);
+  } catch (err) {
+>>>>>>> 1728b26 (Nouveau commit propre)
     res.status(500).json({ error: err.message });
   }
 });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1728b26 (Nouveau commit propre)
 // --- GET maisons du propriétaire ---
 router.get("/mes-maisons", auth, async (req, res) => {
   try {
