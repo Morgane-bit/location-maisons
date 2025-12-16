@@ -104,29 +104,36 @@ router.put("/:id/reponse", auth, async (req, res) => {
         const { reponse } = req.body;
         if (!reponse) return res.status(400).json({ success: false, error: "Réponse manquante" });
 
-        const msgDoc = await db.collection("messages").doc(req.params.id).get();
+        const msgRef = db.collection("messages").doc(req.params.id);
+        const msgDoc = await msgRef.get();
         if (!msgDoc.exists) return res.status(404).json({ error: "Message introuvable" });
 
         const msg = msgDoc.data();
         if (msg.proprietaireEmail !== req.proprietaireEmail) 
             return res.status(403).json({ error: "Non autorisé" });
 
-        await db.collection("messages").doc(req.params.id).update({
+        // --- Mise à jour Firestore ---
+        await msgRef.update({
             reponseProprietaire: reponse,
             statut: "traite",
             updatedAt: new Date(),
         });
 
-        await transporter.sendMail({
+        // --- Tentative envoi mail (non bloquante) ---
+        transporter.sendMail({
             from: `"Propriétaire" <${process.env.GMAIL_USER}>`,
             to: msg.email,
             subject: `Réponse à votre message concernant ${msg.maisonId}`,
             text: reponse
+        }).then(() => {
+            console.log("✅ Email envoyé au client :", msg.email);
+        }).catch(err => {
+            console.error("⚠️ Échec envoi email :", err);
         });
 
         return res.json({
             success: true,
-            message: "Réponse enregistrée, message traité et email envoyé au client",
+            message: "Réponse enregistrée et traitement du mail lancé",
         });
 
     } catch (err) {
