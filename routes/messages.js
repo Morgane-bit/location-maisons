@@ -6,18 +6,17 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 // --- Nodemailer transporter
+// --- Nodemailer transporter pour Brevo
 const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
+    host: "smtp-relay.brevo.com",
     port: 587,
-    secure: false,
+    secure: false, // false car TLS STARTTLS sera utilisé
     auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false
+        user: process.env.BREVO_USER,      // ton email vérifié Brevo
+        pass: process.env.BREVO_SMTP_KEY   // clé SMTP Brevo
     }
 });
+
 
 transporter.verify((error, success) => {
     if (error) {
@@ -121,15 +120,13 @@ router.put("/:id/reponse", auth, async (req, res) => {
 
         // --- Tentative envoi mail (non bloquante) ---
         transporter.sendMail({
-            from: `"Propriétaire" <${process.env.GMAIL_USER}>`,
-            to: msg.email,
-            subject: `Réponse à votre message concernant ${msg.maisonId}`,
-            text: reponse
-        }).then(() => {
-            console.log("✅ Email envoyé au client :", msg.email);
-        }).catch(err => {
-            console.error("⚠️ Échec envoi email :", err);
-        });
+    from: `"Propriétaire" <${process.env.BREVO_USER}>`,
+    to: msg.email,
+    subject: `Réponse à votre message concernant ${msg.maisonId}`,
+    text: reponse
+    })
+    .then(() => console.log("✅ Email envoyé au client :", msg.email))
+    .catch(err => console.error("⚠️ Échec envoi email :", err));
 
         return res.json({
             success: true,
