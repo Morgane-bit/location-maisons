@@ -1,6 +1,6 @@
 // backend/config/firebaseAdmin.js
 const admin = require('firebase-admin');
-const serviceAccount = require(process.env.firebase_key); // Chemin vers ta clé Firebase Admin
+const serviceAccount = JSON.parse(process.env.firebase_key); // Chemin vers ta clé Firebase Admin
 
 // Vérifie si l'app n'est pas déjà initialisée
 if (!admin.apps.length) {
